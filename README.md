@@ -1,1 +1,2 @@
 # terragrunt
++ terragrunt --version
