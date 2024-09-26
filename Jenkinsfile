@@ -35,9 +35,7 @@ pipeline {
                         // sh """
                         // terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
                         // """
-                        echo "
-                        terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
-                        "
+                        echo "terragrunt run-all destroy"
                     }
                 }
             }
@@ -60,14 +58,7 @@ pipeline {
                     //     "base": "main"
                     // }' https://api.github.com/repos/<your-repo-owner>/<your-repo>/pulls
                     // """
-                    echo "
-                    curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -d '{
-                        "title": "${prTitle}",
-                        "body": "${prBody}",
-                        "head": "destroy-branch",
-                        "base": "main"
-                    }' https://api.github.com/repos/<your-repo-owner>/<your-repo>/pulls
-                    "
+                    echo "title prTitl"
                 }
             }
         }
