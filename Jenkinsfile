@@ -21,9 +21,10 @@ pipeline {
                     } else {
                         env.TERRAGRUNT_FLAGS = "terragrunt-non-interactive"
                     }
+                    def prMessage = "Terragrunt destroy PR: "
+                    echo prMessage
                 }
-                def prMessage = "Terragrunt destroy PR: "
-                echo prMessage
+
             }
         }
 
