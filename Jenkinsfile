@@ -24,7 +24,8 @@ pipeline {
                     def prMessage = "Terragrunt destroy PR: "
                     echo prMessage
                 }
-
+                echo "Terragrunt Flags: ${env.TERRAGRUNT_FLAGS}"
+                echo "GitHub Issue Link: ${params.GITHUB_ISSUE_LINK}"
             }
         }
 
