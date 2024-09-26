@@ -9,20 +9,18 @@ pipeline {
 
     environment {
         GITHUB_TOKEN = credentials('LocalJenkinsGitToken') // Assuming a stored GitHub token in Jenkins credentials
-        TERRAGRUNT_FLAGS = ''
     }
 
     stages {
         stage('Setup') {
             steps {
                 script {
+                    // Check the value of DRY_RUN and set TERRAGRUNT_FLAGS accordingly
                     if (params.DRY_RUN) {
                         env.TERRAGRUNT_FLAGS = '--terragrunt-plan-all --terragrunt-non-interactive'
                     } else {
                         env.TERRAGRUNT_FLAGS = '--terragrunt-non-interactive'
                     }
-                    def prMessage = "Terragrunt destroy PR: "
-                    echo prMessage
                 }
                 echo "Terragrunt Flags: ${env.TERRAGRUNT_FLAGS}"
                 echo "GitHub Issue Link: ${params.GITHUB_ISSUE_LINK}"
@@ -34,7 +32,9 @@ pipeline {
                 script {
                     echo "Running Terragrunt destroy on path: ${params.TERRAGRUNT_PATH}"
                     dir(params.TERRAGRUNT_PATH) {
-                        echo "terragrunt run-all destroy"
+                        sh """
+                        terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
+                        """
                     }
                 }
             }
@@ -49,8 +49,14 @@ pipeline {
                     def prTitle = "Destroy Resources for GitHub Issue: ${params.GITHUB_ISSUE_LINK}"
                     def prBody = "This PR represents the destroy of resources as requested in ${params.GITHUB_ISSUE_LINK}."
 
-                    def prMessage = "Terragrunt destroy PR: ${params.prTitle} related to ${params.prBody}"
-                    echo prMessage
+                    sh """
+                    curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -d '{
+                        "title": "${prTitle}",
+                        "body": "${prBody}",
+                        "head": "destroy-branch",
+                        "base": "main"
+                    }' https://api.github.com/repos/<your-repo-owner>/<your-repo>/pulls
+                    """
                 }
             }
         }
