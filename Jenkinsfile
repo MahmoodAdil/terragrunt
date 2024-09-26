@@ -17,9 +17,9 @@ pipeline {
             steps {
                 script {
                     if (params.DRY_RUN) {
-                        env.TERRAGRUNT_FLAGS = '--terragrunt-plan-all --terragrunt-non-interactive'
+                        env.TERRAGRUNT_FLAGS = "terragrunt-plan-all --terragrunt-non-interactive"
                     } else {
-                        env.TERRAGRUNT_FLAGS = '--terragrunt-non-interactive'
+                        env.TERRAGRUNT_FLAGS = "terragrunt-non-interactive"
                     }
                 }
                 echo "Terragrunt Flags: ${env.TERRAGRUNT_FLAGS}"
