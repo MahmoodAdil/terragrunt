@@ -22,8 +22,8 @@ pipeline {
                         env.TERRAGRUNT_FLAGS = "terragrunt-non-interactive"
                     }
                 }
-                echo "Terragrunt Flags: ${env.TERRAGRUNT_FLAGS}"
-                echo "GitHub Issue Link: ${params.GITHUB_ISSUE_LINK}"
+                def prMessage = "Terragrunt destroy PR: "
+                echo prMessage
             }
         }
 
@@ -32,9 +32,6 @@ pipeline {
                 script {
                     echo "Running Terragrunt destroy on path: ${params.TERRAGRUNT_PATH}"
                     dir(params.TERRAGRUNT_PATH) {
-                        // sh """
-                        // terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
-                        // """
                         echo "terragrunt run-all destroy"
                     }
                 }
@@ -50,15 +47,8 @@ pipeline {
                     def prTitle = "Destroy Resources for GitHub Issue: ${params.GITHUB_ISSUE_LINK}"
                     def prBody = "This PR represents the destroy of resources as requested in ${params.GITHUB_ISSUE_LINK}."
 
-                    // sh """
-                    // curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -d '{
-                    //     "title": "${prTitle}",
-                    //     "body": "${prBody}",
-                    //     "head": "destroy-branch",
-                    //     "base": "main"
-                    // }' https://api.github.com/repos/<your-repo-owner>/<your-repo>/pulls
-                    // """
-                    echo "title prTitl"
+                    def prMessage = "Terragrunt destroy PR: ${params.prTitle} related to ${params.prBody}"
+                    echo prMessage
                 }
             }
         }
