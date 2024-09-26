@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        GITHUB_TOKEN = credentials('github-token') // Assuming a stored GitHub token in Jenkins credentials
+        GITHUB_TOKEN = credentials('LocalJenkinsGitToken') // Assuming a stored GitHub token in Jenkins credentials
         TERRAGRUNT_FLAGS = ''
     }
 
