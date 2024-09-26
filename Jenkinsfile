@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         GITHUB_TOKEN = credentials('LocalJenkinsGitToken') // Assuming a stored GitHub token in Jenkins credentials
-        TERRAGRUNT_FLAGS = '--terragrunt-plan-all --terragrunt-non-interactive'
+        TERRAGRUNT_FLAGS = ''
     }
 
     stages {
