@@ -32,9 +32,10 @@ pipeline {
                 script {
                     echo "Running Terragrunt destroy on path: ${params.TERRAGRUNT_PATH}"
                     dir(params.TERRAGRUNT_PATH) {
-                        sh """
-                        terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
-                        """
+                        // sh """
+                        // terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
+                        // """
+                       echo "terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}"
                     }
                 }
             }
