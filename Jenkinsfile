@@ -15,7 +15,7 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    // Check the value of DRY_RUN and set TERRAGRUNT_FLAGS accordingly
+                    // Set TERRAGRUNT_FLAGS based on the value of DRY_RUN
                     if (params.DRY_RUN) {
                         env.TERRAGRUNT_FLAGS = '--terragrunt-plan-all --terragrunt-non-interactive'
                     } else {
@@ -32,11 +32,26 @@ pipeline {
                 script {
                     echo "Running Terragrunt destroy on path: ${params.TERRAGRUNT_PATH}"
                     dir(params.TERRAGRUNT_PATH) {
-                        // sh """
-                        // terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
-                        // """
-                       echo "terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}"
+                        sh """
+                        terragrunt run-all destroy ${env.TERRAGRUNT_FLAGS}
+                        """
                     }
+                }
+            }
+        }
+
+        stage('Create GitHub Branch (Optional)') {
+            when {
+                expression { return !params.DRY_RUN }
+            }
+            steps {
+                script {
+                    // Create a branch if it doesn't exist already (optional)
+                    def branchName = "destroy-branch"
+                    sh """
+                    git checkout -b ${branchName} || git checkout ${branchName}
+                    git push origin ${branchName}
+                    """
                 }
             }
         }
@@ -49,15 +64,20 @@ pipeline {
                 script {
                     def prTitle = "Destroy Resources for GitHub Issue: ${params.GITHUB_ISSUE_LINK}"
                     def prBody = "This PR represents the destroy of resources as requested in ${params.GITHUB_ISSUE_LINK}."
-
-                    sh """
-                    curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -d '{
+                    def createPrCommand = """
+                    curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -H "Content-Type: application/json" \
+                    -d '{
                         "title": "${prTitle}",
                         "body": "${prBody}",
                         "head": "destroy-branch",
                         "base": "main"
                     }' https://api.github.com/repos/MahmoodAdil/terragrunt/pulls
                     """
+
+                    // Execute the curl command and log the response
+                    echo "Creating GitHub PR with title: ${prTitle}"
+                    def response = sh(script: createPrCommand, returnStdout: true).trim()
+                    echo "GitHub PR Response: ${response}"
                 }
             }
         }
@@ -68,14 +88,12 @@ pipeline {
             script {
                 def successMessage = "Terragrunt destroy completed successfully for path: ${params.TERRAGRUNT_PATH} related to ${params.GITHUB_ISSUE_LINK}"
                 echo successMessage
-                // Notify or update GitHub PR about success if required
             }
         }
         failure {
             script {
                 def failureMessage = "Terragrunt destroy failed for path: ${params.TERRAGRUNT_PATH} related to ${params.GITHUB_ISSUE_LINK}"
                 echo failureMessage
-                // Notify or update GitHub PR about failure if required
             }
         }
     }
