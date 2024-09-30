@@ -22,6 +22,7 @@ pipeline {
                         env.TERRAGRUNT_FLAGS = '--terragrunt-non-interactive'
                     }
                 }
+                
                 echo "Terragrunt Flags: ${env.TERRAGRUNT_FLAGS}"
                 echo "GitHub Issue Link: ${params.GITHUB_ISSUE_LINK}"
             }
