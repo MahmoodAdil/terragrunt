@@ -56,7 +56,7 @@ pipeline {
                         "body": "${prBody}",
                         "head": "destroy-branch",
                         "base": "main"
-                    }' https://github.com/MahmoodAdil/terragrunt/pulls
+                    }' https://api.github.com/repos/MahmoodAdil/terragrunt/pulls
                     """
                 }
             }
