@@ -50,9 +50,7 @@ pipeline {
                 script {
                     // Create a branch if it doesn't exist already (optional)
                     def branchName = "destroy-branch"
-                    def file= "/test.txt"
-                    echo "Adding first line" > $file
-                    cat $file
+                    
                     sh """
                     
                    
