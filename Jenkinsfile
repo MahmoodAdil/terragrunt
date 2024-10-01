@@ -51,7 +51,11 @@ pipeline {
                     // Create a branch if it doesn't exist already (optional)
                     def branchName = "destroy-branch"
                     sh """
+                    file="/test.txt"
+                    echo "Adding first line" > $file
                     git checkout -b ${branchName} || git checkout ${branchName}
+                    git add .
+                    git commit -m "adding test file"
                     git push origin ${branchName}
                     """
                 }
