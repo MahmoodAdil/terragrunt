@@ -22,6 +22,17 @@ pipeline {
             }
         }
 
+        stage('Make Dummy Change (Optional)') {
+            steps {
+                script {
+                    sh """
+                    # Modify a file or create a new one
+                    echo "Dummy change by Jenkins pipeline" > dummy-file.txt
+                    """
+                }
+            }
+        }
+
         stage('Push Changes to GitHub') {
             steps {
                 script {
