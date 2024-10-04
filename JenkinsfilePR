@@ -1,0 +1,92 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_TOKEN = credentials('LocalJenkinsGitToken') // GitHub token in Jenkins credentials
+    }
+
+    parameters {
+        string(name: 'SOURCE_BRANCH', defaultValue: 'feature-branch', description: 'The branch to create the PR from')
+        string(name: 'TARGET_BRANCH', defaultValue: 'main', description: 'The branch to create the PR into')
+        string(name: 'PR_TITLE', defaultValue: 'Automated Pull Request from Jenkins', description: 'Title for the PR')
+        string(name: 'PR_BODY', defaultValue: 'This pull request was automatically created by Jenkins.', description: 'Body of the PR')
+    }
+
+    stages {
+        stage('Checkout Git Repository') {
+            steps {
+                script {
+                    // Ensure the repository is checked out
+                    checkout scm
+                }
+            }
+        }
+
+        stage('Push Changes to GitHub') {
+            steps {
+                script {
+                    def sourceBranch = params.SOURCE_BRANCH
+                    echo "Committing and pushing changes to ${sourceBranch}"
+
+                    // Ensure that we are in the git repository before running git commands
+                    sh """
+                    git config user.name "jenkins"
+                    git config user.email "jenkins@example.com"
+                    git checkout ${sourceBranch}
+                    git add .
+                    git commit -m "Automated commit from Jenkins"
+                    git push origin ${sourceBranch}
+                    """
+                }
+            }
+        }
+
+        stage('Create GitHub PR') {
+            steps {
+                script {
+                    def repoOwner = "MahmoodAdil"  // Replace with your GitHub repo owner
+                    def repoName = "terragrunt"    // Replace with your GitHub repo name
+                    def prTitle = params.PR_TITLE
+                    def prBody = params.PR_BODY
+                    def sourceBranch = params.SOURCE_BRANCH
+                    def targetBranch = params.TARGET_BRANCH
+
+                    echo "Creating a GitHub Pull Request from ${sourceBranch} to ${targetBranch}"
+
+                    def createPrCommand = """
+                    curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -H "Content-Type: application/json" \
+                    -d '{
+                        "title": "${prTitle}",
+                        "body": "${prBody}",
+                        "head": "${sourceBranch}",
+                        "base": "${targetBranch}"
+                    }' https://api.github.com/repos/${repoOwner}/${repoName}/pulls
+                    """
+
+                    // Execute the curl command and capture the response
+                    def response = sh(script: createPrCommand, returnStdout: true).trim()
+                    echo "GitHub PR Response: ${response}"
+
+                    // Additional debug for error handling
+                    def statusCode = sh(script: "echo \$?", returnStdout: true).trim()
+                    echo "PR creation status code: ${statusCode}"
+
+                    // Check for validation errors in response
+                    if (response.contains("Validation Failed")) {
+                        error "Failed to create PR: Validation error. Check branch names and permissions."
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pull Request created successfully!"
+        }
+        failure {
+            echo "Failed to create Pull Request."
+        }
+    }
+}
+
