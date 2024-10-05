@@ -57,6 +57,10 @@ pipeline {
                     
                     git checkout -b ${branchName} || git checkout ${branchName}
 
+                    echo "Dummy change for build ${BUILD_NUMBER}" > dummy-file-${BUILD_NUMBER}.txt
+                    git add dummy-file-${BUILD_NUMBER}.txt
+                    git commit -m "Automated commit from Jenkins build ${BUILD_NUMBER}"
+                    
                     git push origin ${branchName}
                     """
                 }
