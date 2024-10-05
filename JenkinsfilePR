@@ -32,20 +32,36 @@ pipeline {
                 }
             }
         }
+        stage('Create New Branch') {
+            steps {
+                script {
+                    // Define new branch name using the Jenkins build number
+                    def sourceBranch = "build-${BUILD_NUMBER}"
 
+                    echo "Creating new branch: ${sourceBranch}"
+
+                    // Create the new branch locally and push it to GitHub
+                    sh """
+                    git checkout -b ${sourceBranch}
+                    git push origin ${sourceBranch}
+                    """
+                }
+            }
+        }
         stage('Push Changes to GitHub') {
             steps {
                 script {
-                    def sourceBranch = params.SOURCE_BRANCH"-build-${BUILD_NUMBER}"
+                   // def sourceBranch = params.SOURCE_BRANCH"-build-${BUILD_NUMBER}"
                     echo "Committing and pushing changes to ${sourceBranch}"
 
                     // Ensure that we are in the git repository before running git commands
                     sh """
                     git config user.name "jenkins"
                     git config user.email "jenkins@example.com"
-                    git checkout -b ${sourceBranch}
-                    git add .
-                    git commit -m "Automated commit from Jenkins"
+                   // git checkout -b ${sourceBranch}
+                    echo "Dummy change for build ${BUILD_NUMBER}" > dummy-file.txt
+                    git add dummy-file.txt
+                    git commit -m "Automated commit from Jenkins build ${BUILD_NUMBER}"
                     git push origin ${sourceBranch}
                     """
                 }
@@ -59,7 +75,7 @@ pipeline {
                     def repoName = "terragrunt"    // Replace with your GitHub repo name
                     def prTitle = params.PR_TITLE
                     def prBody = params.PR_BODY
-                    def sourceBranch = params.SOURCE_BRANCH
+                    //def sourceBranch = params.SOURCE_BRANCH
                     def targetBranch = params.TARGET_BRANCH
 
                     echo "Creating a GitHub Pull Request from ${sourceBranch} to ${targetBranch}"
