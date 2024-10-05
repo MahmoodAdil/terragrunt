@@ -74,7 +74,7 @@ pipeline {
             steps {
                 script {
                     def prTitle = "Destroy Resources for GitHub Issue: ${params.GITHUB_ISSUE_LINK}"
-                    def prBody = "This PR represents the destroy of resources as requested in ${params.GITHUB_ISSUE_LINK}."
+                    def prBody = "This PR represents the destroy of resources as requested in ${params.GITHUB_ISSUE_LINK}. \\n\\n Jenkins Build URL: ${BUILD_URL}"
                     def createPrCommand = """
                     curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -H "Content-Type: application/json" \
                     -d '{
