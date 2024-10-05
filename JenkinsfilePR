@@ -36,14 +36,14 @@ pipeline {
             steps {
                 script {
                     // Define new branch name using the Jenkins build number
-                    def sourceBranch = "build-${BUILD_NUMBER}"
+                   env.SOURCE_BRANCH  = "build-${BUILD_NUMBER}"
 
-                    echo "Creating new branch: ${sourceBranch}"
+                    echo "Creating new branch: ${env.SOURCE_BRANCH}"
 
                     // Create the new branch locally and push it to GitHub
                     sh """
-                    git checkout -b ${sourceBranch}
-                    git push origin ${sourceBranch}
+                    git checkout -b ${env.SOURCE_BRANCH}
+                    git push origin ${env.SOURCE_BRANCH}
                     """
                 }
             }
@@ -53,17 +53,17 @@ pipeline {
                 script {
                    // def sourceBranch = params.SOURCE_BRANCH"-build-${BUILD_NUMBER}"
                     echo "stage Push Changes to GitHub"
-                    echo "Committing and pushing changes to ${sourceBranch}"
+                    echo "Committing and pushing changes to ${env.SOURCE_BRANCH}"
 
                     // Ensure that we are in the git repository before running git commands
                     sh """
                     git config user.name "jenkins"
                     git config user.email "jenkins@example.com"
-                   // git checkout -b ${sourceBranch}
+                   // git checkout -b ${env.SOURCE_BRANCH}
                     echo "Dummy change for build ${BUILD_NUMBER}" > dummy-file.txt
                     git add dummy-file.txt
                     git commit -m "Automated commit from Jenkins build ${BUILD_NUMBER}"
-                    git push origin ${sourceBranch}
+                    git push origin ${env.SOURCE_BRANCH}
                     """
                 }
             }
@@ -79,14 +79,14 @@ pipeline {
                     //def sourceBranch = params.SOURCE_BRANCH
                     def targetBranch = params.TARGET_BRANCH
 
-                    echo "Creating a GitHub Pull Request from ${sourceBranch} to ${targetBranch}"
+                    echo "Creating a GitHub Pull Request from ${env.SOURCE_BRANCH} to ${targetBranch}"
 
                     def createPrCommand = """
                     curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -H "Content-Type: application/json" \
                     -d '{
                         "title": "${prTitle}",
                         "body": "${prBody}",
-                        "head": "${sourceBranch}",
+                        "head": "${env.SOURCE_BRANCH}",
                         "base": "${targetBranch}"
                     }' https://api.github.com/repos/${repoOwner}/${repoName}/pulls
                     """
