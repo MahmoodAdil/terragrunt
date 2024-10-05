@@ -59,7 +59,7 @@ pipeline {
                     sh """
                     git config user.name "jenkins"
                     git config user.email "jenkins@example.com"
-                   // git checkout -b ${env.SOURCE_BRANCH}
+                   # git checkout -b ${env.SOURCE_BRANCH}
                     echo "Dummy change for build ${BUILD_NUMBER}" > dummy-file.txt
                     git add dummy-file.txt
                     git commit -m "Automated commit from Jenkins build ${BUILD_NUMBER}"
