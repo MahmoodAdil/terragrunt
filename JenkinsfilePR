@@ -43,7 +43,7 @@ pipeline {
                     // Create the new branch locally and push it to GitHub
                     sh """
                     git checkout -b ${sourceBranch}
-                    #git push origin ${sourceBranch}
+                    git push origin ${sourceBranch}
                     """
                 }
             }
@@ -52,6 +52,7 @@ pipeline {
             steps {
                 script {
                    // def sourceBranch = params.SOURCE_BRANCH"-build-${BUILD_NUMBER}"
+                    echo "stage Push Changes to GitHub"
                     echo "Committing and pushing changes to ${sourceBranch}"
 
                     // Ensure that we are in the git repository before running git commands
