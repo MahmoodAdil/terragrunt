@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     // Define new branch name using the Jenkins build number
-                   env.SOURCE_BRANCH  = "params.SOURCE_BRANCH-build-${BUILD_NUMBER}"
+                   env.SOURCE_BRANCH  = "${params.SOURCE_BRANCH}-build-${BUILD_NUMBER}"
 
                     echo "Creating new branch: ${env.SOURCE_BRANCH}"
 
