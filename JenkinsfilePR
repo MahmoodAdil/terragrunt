@@ -75,7 +75,7 @@ pipeline {
                     def repoOwner = "MahmoodAdil"  // Replace with your GitHub repo owner
                     def repoName = "terragrunt"    // Replace with your GitHub repo name
                     def prTitle = "${params.PR_TITLE} Build number ${BUILD_NUMBER}"
-                    def prBody = "${params.PR_BODY} Jenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
+                    def prBody = "${params.PR_BODY} \\n\\n Jenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
                     //def prBody = "${params.PR_BODY}\n\nJenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
                     //def sourceBranch = params.SOURCE_BRANCH
                     def targetBranch = params.TARGET_BRANCH
