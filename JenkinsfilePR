@@ -49,36 +49,50 @@ pipeline {
         stage('Create New Branch') {
             steps {
                 script {
-                    // Define new branch name using the Jenkins build number
-                   env.SOURCE_BRANCH  = "${params.SOURCE_BRANCH}-build-${BUILD_NUMBER}"
+                    // Set TERRAGRUNT_FLAGS based on the value of DRY_RUN
+                    if (params.DRY_RUN) {
+                        echo "DRY_RUN TRUE Skip to Create New Branch"
+                    } else {
+                        // Define new branch name using the Jenkins build number
+                       env.SOURCE_BRANCH  = "${params.SOURCE_BRANCH}-build-${BUILD_NUMBER}"
+    
+                        echo "Creating new branch: ${env.SOURCE_BRANCH}"
+    
+                        // Create the new branch locally and push it to GitHub
+                        sh """
+                        git checkout -b ${env.SOURCE_BRANCH}
+                        git push origin ${env.SOURCE_BRANCH}
+                        """
+                    }
 
-                    echo "Creating new branch: ${env.SOURCE_BRANCH}"
-
-                    // Create the new branch locally and push it to GitHub
-                    sh """
-                    git checkout -b ${env.SOURCE_BRANCH}
-                    git push origin ${env.SOURCE_BRANCH}
-                    """
+                    
                 }
             }
         }
         stage('Push Changes to GitHub') {
             steps {
                 script {
-                   // def sourceBranch = params.SOURCE_BRANCH"-build-${BUILD_NUMBER}"
-                    echo "stage Push Changes to GitHub"
-                    echo "Committing and pushing changes to ${env.SOURCE_BRANCH}"
+                    // Set TERRAGRUNT_FLAGS based on the value of DRY_RUN
+                    if (params.DRY_RUN) {
+                        echo "DRY_RUN TRUE Skip step of Push Changes to GitHub"
+                    } else {
+                        // def sourceBranch = params.SOURCE_BRANCH"-build-${BUILD_NUMBER}"
+                        echo "stage Push Changes to GitHub"
+                        echo "Committing and pushing changes to ${env.SOURCE_BRANCH}"
+    
+                        // Ensure that we are in the git repository before running git commands
+                        sh """
+                        git config user.name "jenkins"
+                        git config user.email "jenkins@example.com"
+                       # git checkout -b ${env.SOURCE_BRANCH}
+                        echo "Dummy change for build ${BUILD_NUMBER}" > dummy-file-${BUILD_NUMBER}.txt
+                        git add dummy-file-${BUILD_NUMBER}.txt
+                        git commit -m "Automated commit from Jenkins build ${BUILD_NUMBER}"
+                        git push origin ${env.SOURCE_BRANCH}
+                        """
+                    }
 
-                    // Ensure that we are in the git repository before running git commands
-                    sh """
-                    git config user.name "jenkins"
-                    git config user.email "jenkins@example.com"
-                   # git checkout -b ${env.SOURCE_BRANCH}
-                    echo "Dummy change for build ${BUILD_NUMBER}" > dummy-file-${BUILD_NUMBER}.txt
-                    git add dummy-file-${BUILD_NUMBER}.txt
-                    git commit -m "Automated commit from Jenkins build ${BUILD_NUMBER}"
-                    git push origin ${env.SOURCE_BRANCH}
-                    """
+
                 }
             }
         }
@@ -86,38 +100,48 @@ pipeline {
         stage('Create GitHub PR') {
             steps {
                 script {
-                    def repoOwner = "MahmoodAdil"  // Replace with your GitHub repo owner
-                    def repoName = "terragrunt"    // Replace with your GitHub repo name
-                    def prTitle = "${params.PR_TITLE} Build number ${BUILD_NUMBER}"
-                    def prBody = "${params.PR_BODY} \\n\\n Jenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
-                    //def prBody = "${params.PR_BODY}\n\nJenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
-                    //def sourceBranch = params.SOURCE_BRANCH
-                    def targetBranch = params.TARGET_BRANCH
-
-                    echo "Creating a GitHub Pull Request from ${env.SOURCE_BRANCH} to ${targetBranch}"
-
-                    def createPrCommand = """
-                    curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -H "Content-Type: application/json" \
-                    -d '{
-                        "title": "${prTitle}",
-                        "body": "${prBody}",
-                        "head": "${env.SOURCE_BRANCH}",
-                        "base": "${targetBranch}"
-                    }' https://api.github.com/repos/${repoOwner}/${repoName}/pulls
-                    """
-
-                    // Execute the curl command and capture the response
-                    def response = sh(script: createPrCommand, returnStdout: true).trim()
-                    echo "GitHub PR Response: ${response}"
-
-                    // Additional debug for error handling
-                    def statusCode = sh(script: "echo \$?", returnStdout: true).trim()
-                    echo "PR creation status code: ${statusCode}"
-
-                    // Check for validation errors in response
-                    if (response.contains("Validation Failed")) {
-                        error "Failed to create PR: Validation error. Check branch names and permissions."
+                    // Set TERRAGRUNT_FLAGS based on the value of DRY_RUN
+                    if (params.DRY_RUN) {
+                        echo "DRY_RUN TRUE Skip step Create GitHub PR"
+                    } else {
+                        def repoOwner = "MahmoodAdil"  // Replace with your GitHub repo owner
+                        def repoName = "terragrunt"    // Replace with your GitHub repo name
+                        def prTitle = "${params.PR_TITLE} Build number ${BUILD_NUMBER}"
+                        def prBody = "${params.PR_BODY} \\n\\n Jenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
+                        //def prBody = "${params.PR_BODY}\n\nJenkins Build URL: ${BUILD_URL}" // Add build URL to PR body
+                        //def sourceBranch = params.SOURCE_BRANCH
+                        def targetBranch = params.TARGET_BRANCH
+    
+                        echo "Creating a GitHub Pull Request from ${env.SOURCE_BRANCH} to ${targetBranch}"
+    
+                        def createPrCommand = """
+                        curl -X POST -H "Authorization: token ${env.GITHUB_TOKEN}" -H "Content-Type: application/json" \
+                        -d '{
+                            "title": "${prTitle}",
+                            "body": "${prBody}",
+                            "head": "${env.SOURCE_BRANCH}",
+                            "base": "${targetBranch}"
+                        }' https://api.github.com/repos/${repoOwner}/${repoName}/pulls
+                        """
+    
+                        // Execute the curl command and capture the response
+                        def response = sh(script: createPrCommand, returnStdout: true).trim()
+                        echo "GitHub PR Response: ${response}"
+    
+                        // Additional debug for error handling
+                        def statusCode = sh(script: "echo \$?", returnStdout: true).trim()
+                        echo "PR creation status code: ${statusCode}"
+    
+                        // Check for validation errors in response
+                        if (response.contains("Validation Failed")) {
+                            error "Failed to create PR: Validation error. Check branch names and permissions."
+                        }
                     }
+
+
+
+
+
                 }
             }
         }
