@@ -148,12 +148,14 @@ pipeline {
     }
 
     post {
-        success {
+            success {
+                    script {
                     // Set TERRAGRUNT_FLAGS based on the value of DRY_RUN
                     if (params.DRY_RUN) {
                         echo "DRY_RUN TRUE Skipped Pull Request"
                     } else {
-                        echo "Pull Request created successfully!"
+                            echo "Pull Request created successfully!"
+                        }cho "DRY_RUN False"
                     }
         }
         failure {
